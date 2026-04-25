@@ -385,7 +385,7 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
             styler = styler.set_properties(**{"padding": "10px 8px"})
             st.dataframe(styler, use_container_width=True, hide_index=True)
         except Exception as e:
-            st.error("Diagnostics display error (non-critical)")
+            st.info("Row-level diagnostics not available in this demo view. Core scoring remains valid.")
     else:
         st.warning("Row-level diagnostics unavailable for this run.")
 
