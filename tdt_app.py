@@ -190,7 +190,11 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
         unsafe_allow_html=True,
     )
 
-    st.header("Try Your Own Input")
+    st.header("Preview Custom Input Workflow")
+    st.caption(
+        "Public safe mode does not run the private scoring engine. This preview shows the intended "
+        "custom-input workflow while protecting the underlying signal-generation method."
+    )
     response_text = st.text_area("Paste a response to evaluate", value="", height=140)
     instruction_text = st.text_area(
         "Paste the instruction (optional but recommended)", value="", height=90
@@ -198,7 +202,7 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
     st.caption(
         "Single input runs will show limited structural signals. TDT is strongest on batches."
     )
-    if st.button("Run TDT on this input"):
+    if st.button("Preview custom input workflow"):
         if not response_text.strip():
             st.warning("Please paste a response before running TDT.")
         else:
