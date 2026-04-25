@@ -1,0 +1,9 @@
+{
+  "rule_set_id": "mwp_demo_v1",
+  "tag_when_sham_comparison": {
+    "beat": "STABLE_CORE",
+    "tie": "STRESSED_ACCEPTABLE",
+    "fail": "FAILED_GATE"
+  },
+  "notes": "Minimal MWP demo bundle for TDT v1 Stage 8."
+}

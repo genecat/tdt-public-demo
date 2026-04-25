@@ -1,0 +1,30 @@
+{
+  "run": {
+    "run_schema_version": "1.0",
+    "run_id": "demo_3x",
+    "title": "Small demo run (3 items)"
+  },
+  "inputs": {
+    "records_path": "demo/input.json",
+    "input_contract_id": "json_list_v1"
+  },
+  "computation": {
+    "model_id": "demo",
+    "benchmark_family": "demo",
+    "panel_size": 3,
+    "aggregation_scope": "per_benchmark_family",
+    "pipeline_lock_id": "mwp_demo_lock"
+  },
+  "diagnostics": {
+    "sham_mode": "refined_magnitude_aware",
+    "sham_baseline": "use_precomputed_file",
+    "sham_baseline_path": "reference_data/mwp_demo_sham.json"
+  },
+  "rules": {
+    "rule_set_id": "mwp_demo_v1",
+    "rules_path": "configs/mwp_demo_rules.json"
+  },
+  "outputs": {
+    "output_dir": "outputs/demo"
+  }
+}

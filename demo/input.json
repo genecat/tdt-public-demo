@@ -1,0 +1,20 @@
+[
+  {
+    "item_id": "good_1",
+    "benchmark_family": "demo",
+    "instruction_task_text": "Explain what photosynthesis is in 2-3 sentences.",
+    "response_text": "Photosynthesis is the process by which plants convert sunlight into energy. Using carbon dioxide and water, they produce glucose and release oxygen. It is essential for life on Earth because it forms the base of the food chain."
+  },
+  {
+    "item_id": "weak_1",
+    "benchmark_family": "demo",
+    "instruction_task_text": "Explain what photosynthesis is in 2-3 sentences.",
+    "response_text": "Photosynthesis is when plants do stuff with sunlight. It is very important and has to do with energy. It happens in plants and is important for nature."
+  },
+  {
+    "item_id": "failure_1",
+    "benchmark_family": "demo",
+    "instruction_task_text": "List 3 causes of World War I.",
+    "response_text": "World War II was a global conflict that involved many countries and had many causes."
+  }
+]
