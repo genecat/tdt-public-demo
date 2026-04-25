@@ -1,0 +1,4 @@
+item_id,S,semantic_repetition_score,topic_drift_score,specificity_vagueness_score,structural_coherence_score,internal_consistency_score,instruction_alignment_score,instruction_alignment_mode,critical_slot_integrity_score,critical_slot_integrity_mode,information_density_score,reasoning_progression_score,constraint_stability_score,combined_row_risk,primary_weakness
+good_1,0.5147862982022189,0.035176916046481266,0.7102133645265278,0.0,0.14838263579061242,0.0,0.0,full,0.0,full,0.45,0.03664596273291926,0.0,0.17875458327272428,topic_drift_score
+weak_1,0.7021743656434369,0.13373219373219375,0.4656597725069089,0.29700000000000004,0.10473885034816535,0.0,0.0,full,0.0,full,0.4975308641975309,0.21,0.0,0.20022616331745363,topic_drift_score
+failure_1,0.3571287263361632,0.038285714285714284,0.0,0.0,0.06,0.0,0.0,full,0.0,full,0.45,0.0,0.0,0.019657142857142856,multi_factor

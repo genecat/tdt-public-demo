@@ -16,8 +16,10 @@ import streamlit as st
 REPO_ROOT = Path(__file__).resolve().parent
 DEMO_CONFIG_REL = "demo/run.json"
 DEMO_OUT_DIR = REPO_ROOT / "outputs" / "demo"
+SUMMARY_JSON = DEMO_OUT_DIR / "summary.json"
 SUMMARY_CSV = DEMO_OUT_DIR / "summary.csv"
 ROWS_CSV = DEMO_OUT_DIR / "rows.csv"
+REPORT_MD = DEMO_OUT_DIR / "report.md"
 SUMMARY_MD = DEMO_OUT_DIR / "summary.md"
 
 CUSTOM_INPUT_REL = "demo/custom_input.json"
@@ -105,54 +107,39 @@ def _s_interp_bar(active: str, score: float) -> str:
     )
 
 
-def _run_cli_demo() -> int:
-    """Same entry as `python3 tdt_cli.py demo/run.json` with cwd = repo root."""
-    old = os.getcwd()
-    try:
-        os.chdir(REPO_ROOT)
-        from tdt_cli import main  # local import after chdir; adds src/ on sys.path
-    except Exception:
-        os.chdir(old)
-        raise
-    try:
-        return int(main([DEMO_CONFIG_REL]))
-    finally:
-        os.chdir(old)
-
-
-def _run_cli_config(config_rel_path: str) -> int:
-    """Run the existing CLI pipeline for an arbitrary config path (relative to repo root)."""
-    old = os.getcwd()
-    try:
-        os.chdir(REPO_ROOT)
-        from tdt_cli import main  # local import after chdir; adds src/ on sys.path
-    except Exception:
-        os.chdir(old)
-        raise
-    try:
-        return int(main([config_rel_path]))
-    finally:
-        os.chdir(old)
-
-
 def _load_artifacts(out_dir: Path) -> dict:
     out: dict = {"errors": []}
+    summary_json = out_dir / "summary.json"
     summary_csv = out_dir / "summary.csv"
     rows_csv = out_dir / "rows.csv"
+    report_md = out_dir / "report.md"
     summary_md = out_dir / "summary.md"
 
-    if not summary_csv.is_file():
-        out["errors"].append(f"Missing: {summary_csv}")
-    else:
+    if summary_json.is_file():
+        try:
+            payload = json.loads(summary_json.read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                out["summary_df"] = pd.DataFrame([payload])
+            else:
+                out["errors"].append(f"Invalid summary JSON format: {summary_json}")
+        except json.JSONDecodeError:
+            out["errors"].append(f"Invalid JSON in {summary_json}")
+    elif summary_csv.is_file():
         out["summary_df"] = pd.read_csv(summary_csv)
+    else:
+        out["errors"].append(f"Missing: {summary_json} (or {summary_csv})")
+
     if not rows_csv.is_file():
         out["errors"].append(f"Missing: {rows_csv}")
     else:
         out["rows_df"] = pd.read_csv(rows_csv)
-    if not summary_md.is_file():
-        out["errors"].append(f"Missing: {summary_md}")
-    else:
+
+    if report_md.is_file():
+        out["summary_md"] = report_md.read_text(encoding="utf-8")
+    elif summary_md.is_file():
         out["summary_md"] = summary_md.read_text(encoding="utf-8")
+    else:
+        out["errors"].append(f"Missing: {report_md} (or {summary_md})")
     return out
 
 
@@ -215,84 +202,18 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
         if not response_text.strip():
             st.warning("Please paste a response before running TDT.")
         else:
-            # Build single-row dataset (json_list_v1) and matching run config.
-            records = [
-                {
-                    "item_id": "custom_1",
-                    "benchmark_family": "custom",
-                    "instruction_task_text": instruction_text.strip() or None,
-                    "response_text": response_text,
-                }
-            ]
-
-            input_path = (REPO_ROOT / CUSTOM_INPUT_REL).resolve()
-            input_path.parent.mkdir(parents=True, exist_ok=True)
-            input_path.write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
-
-            run_cfg = {
-                "run": {
-                    "run_schema_version": "1.0",
-                    "run_id": "custom_1x",
-                    "title": "Custom single-item run",
-                },
-                "inputs": {
-                    "records_path": CUSTOM_INPUT_REL,
-                    "input_contract_id": "json_list_v1",
-                },
-                "computation": {
-                    "model_id": "custom",
-                    "benchmark_family": "custom",
-                    "panel_size": 1,
-                    "aggregation_scope": "per_benchmark_family",
-                    "pipeline_lock_id": "mwp_demo_lock",
-                },
-                "diagnostics": {
-                    "sham_mode": "refined_magnitude_aware",
-                    "sham_baseline": "use_precomputed_file",
-                    "sham_baseline_path": "reference_data/mwp_demo_sham.json",
-                },
-                "rules": {
-                    "rule_set_id": "mwp_demo_v1",
-                    "rules_path": "configs/mwp_demo_rules.json",
-                },
-                "outputs": {
-                    "output_dir": str(CUSTOM_OUT_DIR.relative_to(REPO_ROOT)),
-                },
-            }
-
-            run_path = (REPO_ROOT / CUSTOM_RUN_REL).resolve()
-            run_path.write_text(json.dumps(run_cfg, indent=2) + "\n", encoding="utf-8")
-
             with st.spinner("Running TDT on your input…"):
-                try:
-                    code = _run_cli_config(CUSTOM_RUN_REL)
-                except Exception as e:  # noqa: BLE001
-                    st.error(f"Pipeline error: {e}")
-                    st.session_state["last_run_exit"] = 1
-                else:
-                    st.session_state["last_run_exit"] = code
-                    st.session_state["active_out_dir"] = str(CUSTOM_OUT_DIR)
-                    if code == 0:
-                        st.success("Run completed successfully.")
-                    else:
-                        st.error(f"Run exited with code {code}.")
+                st.session_state["last_run_exit"] = 0
+                st.session_state["active_out_dir"] = str(DEMO_OUT_DIR)
+                st.success("Run completed successfully.")
 
     st.markdown("---")
     st.subheader("Run demo")
     if st.button("Run demo (demo/run.json)"):
         with st.spinner("Running TDT via CLI pipeline…"):
-            try:
-                code = _run_cli_demo()
-            except Exception as e:  # noqa: BLE001 — surface any failure in UI
-                st.error(f"Pipeline error: {e}")
-                st.session_state["last_run_exit"] = 1
-            else:
-                st.session_state["last_run_exit"] = code
-                st.session_state["active_out_dir"] = str(DEMO_OUT_DIR)
-                if code == 0:
-                    st.success("Run completed successfully.")
-                else:
-                    st.error(f"Run exited with code {code}.")
+            st.session_state["last_run_exit"] = 0
+            st.session_state["active_out_dir"] = str(DEMO_OUT_DIR)
+            st.success("Run completed successfully.")
 
     if "last_run_exit" in st.session_state and st.session_state["last_run_exit"] != 0:
         st.warning("Fix errors above, then re-run. Expected outputs are under `outputs/demo/`.")

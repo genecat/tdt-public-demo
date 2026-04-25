@@ -1,0 +1,2 @@
+run_id,rule_set_id,final_tag,row_count,pooled_S_live,refined_sham_score,legacy_sham_score,D_refined_minus_legacy,sham_comparison
+demo_3x,mwp_demo_v1,STABLE_CORE,3,0.5246964633939397,0.55,0.45,0.10000000000000003,beat
