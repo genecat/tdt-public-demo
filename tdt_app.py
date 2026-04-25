@@ -299,6 +299,7 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
 
     active_out_dir = Path(st.session_state.get("active_out_dir", str(DEMO_OUT_DIR)))
     data = _load_artifacts(active_out_dir)
+    results = {"records": data["rows_df"]} if "rows_df" in data else {}
     for msg in data.get("errors", []):
         st.warning(f"Output not available: {msg}")
 
@@ -352,32 +353,41 @@ div[data-testid="stHorizontalBlock"] { gap: 0.7rem !important; }
                 unsafe_allow_html=True,
             )
 
-    if "rows_df" in data:
-        st.markdown("")
-        st.markdown("---")
-        st.header("Row-Level Diagnostics")
-        rows_df = data["rows_df"]
-        minimal_cols = [
-            "item_id",
-            "S",
-            "information_density_score",
-            "reasoning_progression_score",
-            "constraint_stability_score",
-            "primary_weakness",
-        ]
-        show_full = st.checkbox("Show full signal table", value=False)
-        display_df = rows_df if show_full else rows_df[[c for c in minimal_cols if c in rows_df.columns]]
+    st.markdown("")
+    st.markdown("---")
+    st.header("Row-Level Diagnostics")
+    if results and "records" in results:
+        try:
+            rows_df = results["records"]
+            minimal_cols = [
+                "item_id",
+                "S",
+                "information_density_score",
+                "reasoning_progression_score",
+                "constraint_stability_score",
+                "primary_weakness",
+            ]
+            show_full = st.checkbox("Show full signal table", value=False)
+            display_df = (
+                rows_df if show_full else rows_df[[c for c in minimal_cols if c in rows_df.columns]]
+            )
 
-        # Polished table: center numeric cols, bold S, roomier rows, keep S color banding
-        numeric_cols = [c for c in display_df.columns if c != "item_id" and c != "primary_weakness"]
-        styler = display_df.style
-        if "S" in display_df.columns:
-            styler = styler.applymap(_s_cell_style, subset=["S"])
-            styler = styler.set_properties(subset=["S"], **{"font-weight": "800"})
-        if numeric_cols:
-            styler = styler.set_properties(subset=numeric_cols, **{"text-align": "center"})
-        styler = styler.set_properties(**{"padding": "10px 8px"})
-        st.dataframe(styler, use_container_width=True, hide_index=True)
+            # Polished table: center numeric cols, bold S, roomier rows, keep S color banding
+            numeric_cols = [
+                c for c in display_df.columns if c != "item_id" and c != "primary_weakness"
+            ]
+            styler = display_df.style
+            if "S" in display_df.columns:
+                styler = styler.applymap(_s_cell_style, subset=["S"])
+                styler = styler.set_properties(subset=["S"], **{"font-weight": "800"})
+            if numeric_cols:
+                styler = styler.set_properties(subset=numeric_cols, **{"text-align": "center"})
+            styler = styler.set_properties(**{"padding": "10px 8px"})
+            st.dataframe(styler, use_container_width=True, hide_index=True)
+        except Exception as e:
+            st.error("Diagnostics display error (non-critical)")
+    else:
+        st.warning("Row-level diagnostics unavailable for this run.")
 
     if "summary_md" in data:
         st.markdown("")
