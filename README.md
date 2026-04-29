@@ -38,3 +38,11 @@ A low-risk or stable structural result does **not** mean an output is true.
 A high-risk or unstable structural result does **not** mean an output is false.
 
 TDT is best used as a diagnostic layer alongside human review.
+
+## Copyright and Use Notice
+
+Copyright © 2026 Eugene Catrambone. All rights reserved.
+
+This repository is provided for demonstration and evaluation purposes only. No license is granted for commercial use, redistribution, modification, sublicensing, or derivative works without prior written permission.
+
+This public repository is a sanitized demonstration version of TDT and does not include the full private research/development repository, broader experiments, historical artifacts, proprietary calibration materials, or internal implementation materials.
